@@ -85,4 +85,4 @@ This was my first bigger project outside of school exercises, so a lot of this w
 
 ## Notes
 
-I used an AI coding assistant (VS Code chatbot) while building this, mainly for debugging and explaining concepts I didn't understand yet. The idea was inspired by Anki, adapted to what I wanted to build myself, and I decided on the structure and features on my own.
+I used an AI coding assistant while building this, mainly for debugging and explaining concepts I didn't understand yet. The idea was inspired by Anki, adapted to what I wanted to build myself, and I decided on the structure and features on my own.
