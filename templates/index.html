@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karteikarten</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="main-title">Karteikarten</h1>
+
+        {% if aktueller_ordner %}
+            <h2 class="sub-nav"><a href="/" class="nav-link">Home</a> / {{ aktueller_ordner.name }}</h2>
+        {% endif %}
+
+        <div class="input-section">
+            {% if aktueller_ordner %}
+                <div class="form-group box-white card-creator">
+                    <h3>Neue Karteikarte</h3>
+                    <form action="/karte_erstellen" method="POST" class="add-form column">
+                        <textarea name="frage" placeholder="Frage" required></textarea>
+                        <textarea name="antwort" placeholder="Antwort" required></textarea>
+                        <input type="hidden" name="ordner_id" value="{{ aktueller_ordner.id }}">
+                        <button type="submit" class="blue-btn">Karte speichern</button>
+                    </form>
+                </div>
+                <a href="/lernen/{{ aktueller_ordner.id }}" class="learn-btn">Stapel jetzt lernen</a>
+            {% else %}
+                <div class="form-group box-blue">
+                    <h3>Neuen Hauptordner erstellen</h3>
+                    <form action="/erstellen" method="POST" class="add-form">
+                        <input type="text" name="name" class="main-input" placeholder="Name..." required>
+                        <input type="hidden" name="parent_id" value="None">
+                        <button type="submit" class="blue-btn">Erstellen</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if not aktueller_ordner %}
+        <div class="list-section">
+            <h3 class="section-headline">Ordner</h3>
+            {% for o in ordner_liste %}
+                <div class="item">
+                    {% if edit_id == o.id %}
+                        <form action="/bearbeiten/ordner/{{ o.id }}" method="POST" class="edit-row">
+                            <input type="text" name="neuer_name" value="{{ o.name }}" class="edit-input-field" autoFocus>
+                            <div class="actions">
+                                <button type="submit" class="save-btn-active">Speichern</button>
+                                <a href="/" class="del-link">Abbrechen</a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <details class="folder-accordion" 
+                            {% if edit_id %}
+                                {% for sub in o.unterordner %}
+                                    {% if sub.id == edit_id %} open {% endif %}
+                                {% endfor %}
+                            {% endif %}>
+                            <summary class="display-row">
+                                <div class="folder-header-left">
+                                    <span class="arrow">▶</span>
+                                    <a href="/ordner/{{ o.id }}" class="folder-title-link">{{ o.name }}</a>
+                                </div>
+                                <div class="actions">
+                                    <a href="?edit_id={{ o.id }}" class="edit-btn-link">Bearbeiten</a>
+                                    <a href="/loeschen/ordner/{{ o.id }}" class="del-link">Löschen</a>
+                                </div>
+                            </summary>
+                            <div class="accordion-content">
+                                <div class="add-subfolder-area">
+                                    <form action="/erstellen" method="POST" class="subfolder-inline-form">
+                                        <input type="text" name="name" class="sub-input" placeholder="Neuer Unterordner..." required>
+                                        <input type="hidden" name="parent_id" value="{{ o.id }}">
+                                        <button type="submit" class="add-sub-btn">Hinzufügen</button>
+                                    </form>
+                                </div>
+                                <div class="subfolders-list">
+                                    <p class="sub-label">Unterordner</p>
+                                    {% for sub in o.unterordner %}
+                                        <div class="sub-item">
+                                            {% if edit_id == sub.id %}
+                                                <form action="/bearbeiten/ordner/{{ sub.id }}" method="POST" class="sub-edit-form">
+                                                    <input type="text" name="neuer_name" value="{{ sub.name }}" class="sub-input-edit" autoFocus>
+                                                    <button type="submit" class="ok-btn">Speichern</button>
+                                                </form>
+                                            {% else %}
+                                                <a href="/ordner/{{ sub.id }}" class="sub-link">{{ sub.name }}</a>
+                                                <div class="sub-actions">
+                                                    <a href="?edit_id={{ sub.id }}" class="edit-sub-link">Bearbeiten</a>
+                                                    <a href="/loeschen/ordner/{{ sub.id }}" class="del-sub-link">Löschen</a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </details>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="list-section">
+                <h3>Karteikarten im Ordner</h3>
+                {% for k in aktueller_ordner.karten %}
+                    <div class="item card-item">
+                        {% if edit_karte_id == k.id %}
+                            <form action="/bearbeiten/karte/{{ k.id }}" method="POST" class="edit-column">
+                                <textarea name="neue_frage">{{ k.frage }}</textarea>
+                                <textarea name="neue_antwort">{{ k.antwort }}</textarea>
+                                <div class="actions">
+                                    <button type="submit" class="save-btn-active">Speichern</button>
+                                    <a href="/ordner/{{ aktueller_ordner.id }}" class="del-link">Abbrechen</a>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="display-row">
+                                <div class="card-preview"><strong>F:</strong> {{ k.frage }}</div>
+                                <div class="actions">
+                                    <a href="?edit_karte_id={{ k.id }}" class="edit-btn-link">Bearbeiten</a>
+                                    <a href="/loeschen/karte/{{ k.id }}" class="del-link">Löschen</a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

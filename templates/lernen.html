@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lernen</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        {% if karten %}
+            <div class="display-row" style="margin-bottom: 20px;">
+                <a href="/ordner/{{ ordner.id }}" class="nav-link">← Zurück</a>
+                <div id="counter" class="card-counter">0 / 0</div>
+            </div>
+            <h2 style="text-align:center;">{{ ordner.name }}</h2>
+            <div id="flashcard" class="item card-item" style="min-height: 150px; display: flex; flex-direction: column; justify-content: center; text-align: center;">
+                <h3 id="label" style="color: var(--gray-soft); font-size: 0.9rem;">Frage:</h3>
+                <p id="inhalt" style="font-size: 1.2rem; font-weight: bold;"></p>
+            </div>
+            <div id="controls" style="margin-top: 20px;">
+                <button id="btn-action" onclick="showAnswer()" class="learn-btn" style="width: 100%;">Antwort zeigen</button>
+                <div id="answer-buttons" style="display: none; gap: 10px;">
+                    <button onclick="handleResult(true)" style="background: var(--success); color: white; flex: 1;" class="blue-btn">Gewusst</button>
+                    <button onclick="handleResult(false)" style="background: var(--danger); color: white; flex: 1;" class="blue-btn">Nicht gewusst</button>
+                </div>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px;">
+                <h2>Alles erledigt!</h2>
+                <p>Alle fälligen Karten für diesen Ordner wurden gelernt.</p>
+                <a href="/" class="learn-btn">Zum Hauptmenü</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script id="karten-daten" type="application/json">{{ karten|tojson|safe }}</script>
+    <script>
+        const kartenStapel = JSON.parse(document.getElementById('karten-daten').textContent);
+        let index = 0;
+        let gelernteEindeutigeKarten = 0;
+        const gesamtAnzahlAmAnfang = kartenStapel.length;
+
+        function updateUI() {
+            if (index < kartenStapel.length) {
+                document.getElementById('counter').innerText = `${gelernteEindeutigeKarten + 1} / ${gesamtAnzahlAmAnfang}`;
+                document.getElementById('label').innerText = "Frage:";
+                document.getElementById('inhalt').innerText = kartenStapel[index].frage;
+                document.getElementById('btn-action').style.display = "block";
+                document.getElementById('answer-buttons').style.display = "none";
+            } else {
+                // Zurück zum Ordner, wenn fertig
+                window.location.href = "/ordner/{{ ordner.id }}";
+            }
+        }
+
+        function showAnswer() {
+            document.getElementById('label').innerText = "Antwort:";
+            document.getElementById('inhalt').innerText = kartenStapel[index].antwort;
+            document.getElementById('btn-action').style.display = "none";
+            document.getElementById('answer-buttons').style.display = "flex";
+        }
+
+        function handleResult(known) {
+            if (known) {
+                fetch('/karte_gewusst/' + kartenStapel[index].id);
+                index++;
+                gelernteEindeutigeKarten++;
+            } else {
+                const aktuelleKarte = kartenStapel[index];
+                kartenStapel.push(aktuelleKarte); 
+                index++;
+            }
+            updateUI();
+        }
+
+        if (kartenStapel.length > 0) updateUI();
+    </script>
+</body>
+</html>
