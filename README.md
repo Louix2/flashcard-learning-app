@@ -1,5 +1,7 @@
 # Flashcard Learning App
 
+*Built: January/February 2026*
+
 A small web app for creating and studying flashcards. I built it as a school project to get a better understanding of Python, Flask and how a database works, since I didn't really know any of that before (and honestly still can't fully explain every part of the code).
 
 The idea is basically a simple version of Anki: you sort your flashcards into folders (and subfolders), then pick a folder and study the cards inside it.
