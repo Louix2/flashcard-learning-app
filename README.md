@@ -30,7 +30,7 @@ The idea is basically a simple version of Anki: you sort your flashcards into fo
 Clone the repo:
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/flashcard-learning-app.git
+git clone https://github.com/Louix2/flashcard-learning-app.git
 cd flashcard-learning-app
 ```
 
